@@ -28,7 +28,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
     <div className="rounded-lg bg-slate-800/90 backdrop-blur-lg shadow-md p-6 flex flex-col items-center relative overflow-hidden border border-slate-700">
       <div className="absolute top-2 right-2 text-xs text-gray-400">
         {data?.timestamp ? (
-          <>Updated: {formatBerlinTime(data.timestamp, 'HH:mm')}</>
+          <>Weather observation recorded at: {formatBerlinTime(data.timestamp, 'HH:mm')}</>
         ) : 'Loading...'}
       </div>
       
@@ -50,10 +50,17 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
         </div>
         
         <div className="flex flex-col">
-          <span className="text-sm text-gray-400">Chance</span>
-          <span className="text-lg font-medium text-white">
-            {data?.precipitationProbability !== undefined ? `${Math.round(data.precipitationProbability)}%` : 'N/A'}
-          </span>
+          <span className="text-sm text-gray-400">Precipitation Chance</span>
+          <div className="text-lg font-medium text-white flex flex-col">
+            <div className="flex justify-between">
+              <span className="text-md">30m:</span>
+              <span>{data?.precipitation30min !== undefined ? `${data.precipitation30min.toFixed(1)}mm` : 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-md">60m:</span>
+              <span>{data?.precipitation60min !== undefined ? `${data.precipitation60min.toFixed(1)}mm` : 'N/A'}</span>
+            </div>
+          </div>
         </div>
         
         <div className="flex flex-col">
