@@ -134,23 +134,17 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
             margin={{ top: 30, right: 20, left: 0, bottom: 30 }}
           >
             <defs>
-              {/* Gradient definitions for temperature ranges */}
-              {[
-                { id: 'tempGradientBelow-5', color: '#1A1F2C' },
-                { id: 'tempGradientBelow0', color: '#9b87f5' },
-                { id: 'tempGradientBelow5', color: '#0EA5E9' },
-                { id: 'tempGradientBelow10', color: '#22D3EE' },
-                { id: 'tempGradientBelow15', color: '#4ade80' },
-                { id: 'tempGradientBelow20', color: '#FEF08A' },
-                { id: 'tempGradientBelow25', color: '#FB923C' },
-                { id: 'tempGradientBelow30', color: '#ef4444' },
-                { id: 'tempGradientAbove30', color: '#991b1b' },
-              ].map(({ id, color }) => (
-                <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={color} stopOpacity={0.1} />
-                </linearGradient>
-              ))}
+              {/* Temperature gradient from top to bottom */}
+              <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#991b1b" stopOpacity={0.8} />
+                <stop offset="15%" stopColor="#ef4444" stopOpacity={0.8} />
+                <stop offset="30%" stopColor="#FB923C" stopOpacity={0.7} />
+                <stop offset="45%" stopColor="#FEF08A" stopOpacity={0.7} />
+                <stop offset="60%" stopColor="#4ade80" stopOpacity={0.7} />
+                <stop offset="75%" stopColor="#22D3EE" stopOpacity={0.7} />
+                <stop offset="90%" stopColor="#0EA5E9" stopOpacity={0.6} />
+                <stop offset="100%" stopColor="#9b87f5" stopOpacity={0.5} />
+              </linearGradient>
             </defs>
             
             <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} stroke="#475569" />
@@ -185,14 +179,13 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
               }}
             />
             
-            {/* Fix the Area component - we can't use a function for fill, so use a basic color and handle the 
-                colored dots separately */}
+            {/* Area chart with temperature gradient */}
             <Area
               type="monotone"
               dataKey="temperature"
               stroke="#ffffff"
               strokeWidth={2}
-              fill="none"
+              fill="url(#temperatureGradient)"
               name="Temperature"
               connectNulls
               dot={false}
@@ -200,16 +193,16 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
                 stroke: '#fff', 
                 strokeWidth: 2, 
                 r: 4, 
-                fill: "#0EA5E9" // Use a static color instead of a function
+                fill: "#0EA5E9"
               }}
             />
             
-            {/* Custom dots and labels for high and low points */}
+            {/* Temperature labels for high and low points */}
             {chartData.map((entry, index) => {
               if (entry.isHigh || entry.isLow) {
                 return (
                   <Area
-                    key={`dot-${index}`}
+                    key={`label-${index}`}
                     type="monotone"
                     dataKey="temperature"
                     stroke="none"
@@ -217,11 +210,9 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
                     dot={(props: any) => {
                       const { cx, cy, payload } = props;
                       if (payload.timestamp === entry.timestamp) {
-                        const color = getTemperatureColor(entry.temperature);
                         const labelY = entry.isLow ? cy + 25 : cy - 25;
                         return (
-                          <g key={`custom-dot-${index}`}>
-                            <circle cx={cx} cy={cy} r={4} fill={color} />
+                          <g key={`temp-label-${index}`}>
                             <text
                               x={cx}
                               y={labelY}
