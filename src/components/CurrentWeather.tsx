@@ -26,23 +26,23 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
   }
 
   return (
-    <div className="rounded-lg bg-slate-800/90 backdrop-blur-lg shadow-md p-6 flex flex-col items-center relative overflow-hidden border border-slate-700">
+    <div className="rounded-lg bg-slate-800/90 backdrop-blur-lg shadow-md p-4 flex flex-col items-center relative overflow-hidden border border-slate-700 h-full">
       <div className="absolute top-2 right-2 text-xs text-gray-400">
         {data?.timestamp ? (
           <>Weather observation recorded at: {formatBerlinTime(data.timestamp, 'HH:mm')}</>
         ) : 'Loading...'}
       </div>
       
-      <div className="flex items-center justify-center">
-        <WeatherIcon size={64} className="text-blue-400" />
-        <div className="ml-4 text-6xl font-bold text-white">{Math.round(data?.temperature || 0)}°</div>
+      <div className="flex items-center justify-center pt-5">
+        <WeatherIcon size={48} className="text-blue-400" />
+        <div className="ml-3 text-5xl font-bold text-white">{Math.round(data?.temperature || 0)}°</div>
       </div>
       
-      <div className="mt-4 text-xl text-gray-200">
+      <div className="mt-2 text-lg text-gray-200">
         {getWeatherDescription(data?.icon)}
       </div>
       
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-6 w-full">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 w-full">
         <div className="flex flex-col">
           <span className="text-sm text-gray-400">Precipitation</span>
           <span className="text-lg font-medium text-white">

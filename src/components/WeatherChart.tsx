@@ -125,9 +125,9 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
   const now = new Date().toISOString();
 
   return (
-    <div className="mt-6 p-4 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg">
-      <h3 className="text-lg font-medium mb-4 text-white">3-Day Temperature Forecast</h3>
-      <div className="h-[300px]">
+    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
+      <h3 className="text-sm font-medium mb-2 text-white">3-Day Temperature Forecast</h3>
+      <div className="h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
