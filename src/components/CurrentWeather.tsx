@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { CurrentWeatherData } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
 import { formatBerlinTime } from '@/services/brightSkyService';
@@ -12,6 +12,7 @@ interface CurrentWeatherProps {
 }
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefresh }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const WeatherIcon = getWeatherIcon(data?.icon);
   
   if (isLoading) {
@@ -74,14 +75,33 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
           <button 
             onClick={(e) => {
               e.preventDefault();
-              const btn = e.currentTarget;
-              btn.classList.add("animate-spin");
+              setIsRefreshing(true);
               onRefresh();
-              setTimeout(() => btn.classList.remove("animate-spin"), 1000);
+              // Use Promise.resolve() to push the state update to the next event loop
+              Promise.resolve().then(() => {
+                const timer = setTimeout(() => {
+                  setIsRefreshing(false);
+                  clearTimeout(timer);
+                }, 1000);
+              });
             }}
-            className="text-blue-400 hover:text-blue-300 text-sm mt-auto flex items-center gap-1 transition-all duration-300"
+            className="text-blue-400 hover:text-blue-300 text-sm mt-auto flex items-center gap-1"
+            disabled={isRefreshing}
           >
-            <RefreshCw size={14} /> Refresh
+            {isRefreshing ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw size={14} /> 
+                Refresh
+              </>
+            )}
           </button>
         </div>
       </div>
