@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useState } from 'react';
 import { CurrentWeatherData } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
 import { formatBerlinTime } from '@/services/brightSkyService';
@@ -12,6 +12,7 @@ interface CurrentWeatherProps {
 }
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefresh }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const WeatherIcon = getWeatherIcon(data?.icon);
   
   if (isLoading) {
@@ -25,23 +26,23 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
   }
 
   return (
-    <div className="rounded-lg bg-slate-800/90 backdrop-blur-lg shadow-md p-6 flex flex-col items-center relative overflow-hidden border border-slate-700">
+    <div className="rounded-lg bg-slate-800/90 backdrop-blur-lg shadow-md p-4 flex flex-col items-center relative overflow-hidden border border-slate-700 h-full">
       <div className="absolute top-2 right-2 text-xs text-gray-400">
         {data?.timestamp ? (
-          <>Updated: {formatBerlinTime(data.timestamp, 'HH:mm')}</>
+          <>Weather observation recorded at: {formatBerlinTime(data.timestamp, 'HH:mm')}</>
         ) : 'Loading...'}
       </div>
       
-      <div className="flex items-center justify-center">
-        <WeatherIcon size={64} className="text-blue-400" />
-        <div className="ml-4 text-6xl font-bold text-white">{Math.round(data?.temperature || 0)}°</div>
+      <div className="flex items-center justify-center pt-5">
+        <WeatherIcon size={48} className="text-blue-400" />
+        <div className="ml-3 text-5xl font-bold text-white">{Math.round(data?.temperature || 0)}°</div>
       </div>
       
-      <div className="mt-4 text-xl text-gray-200">
+      <div className="mt-2 text-lg text-gray-200">
         {getWeatherDescription(data?.icon)}
       </div>
       
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-6 w-full">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 w-full">
         <div className="flex flex-col">
           <span className="text-sm text-gray-400">Precipitation</span>
           <span className="text-lg font-medium text-white">
@@ -50,10 +51,17 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
         </div>
         
         <div className="flex flex-col">
-          <span className="text-sm text-gray-400">Chance</span>
-          <span className="text-lg font-medium text-white">
-            {data?.precipitationProbability !== undefined ? `${Math.round(data.precipitationProbability)}%` : 'N/A'}
-          </span>
+          <span className="text-sm text-gray-400">Precipitation Chance</span>
+          <div className="text-lg font-medium text-white flex flex-col">
+            <div className="flex justify-between">
+              <span className="text-md">30m:</span>
+              <span>{data?.precipitation30min !== undefined ? `${data.precipitation30min.toFixed(1)}mm` : 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-md">60m:</span>
+              <span>{data?.precipitation60min !== undefined ? `${data.precipitation60min.toFixed(1)}mm` : 'N/A'}</span>
+            </div>
+          </div>
         </div>
         
         <div className="flex flex-col">
@@ -65,10 +73,35 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
         
         <div className="flex flex-col">
           <button 
-            onClick={onRefresh}
+            onClick={(e) => {
+              e.preventDefault();
+              setIsRefreshing(true);
+              onRefresh();
+              // Use Promise.resolve() to push the state update to the next event loop
+              Promise.resolve().then(() => {
+                const timer = setTimeout(() => {
+                  setIsRefreshing(false);
+                  clearTimeout(timer);
+                }, 1000);
+              });
+            }}
             className="text-blue-400 hover:text-blue-300 text-sm mt-auto flex items-center gap-1"
+            disabled={isRefreshing}
           >
-            <RefreshCw size={14} /> Refresh
+            {isRefreshing ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw size={14} /> 
+                Refresh
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -76,4 +109,4 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
   );
 };
 
-export default CurrentWeather;
+export default memo(CurrentWeather);
