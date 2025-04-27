@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { CurrentWeatherData } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
 import { formatBerlinTime } from '@/services/brightSkyService';
@@ -72,8 +72,14 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
         
         <div className="flex flex-col">
           <button 
-            onClick={onRefresh}
-            className="text-blue-400 hover:text-blue-300 text-sm mt-auto flex items-center gap-1"
+            onClick={(e) => {
+              e.preventDefault();
+              const btn = e.currentTarget;
+              btn.classList.add("animate-spin");
+              onRefresh();
+              setTimeout(() => btn.classList.remove("animate-spin"), 1000);
+            }}
+            className="text-blue-400 hover:text-blue-300 text-sm mt-auto flex items-center gap-1 transition-all duration-300"
           >
             <RefreshCw size={14} /> Refresh
           </button>
@@ -83,4 +89,4 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data, isLoading, onRefr
   );
 };
 
-export default CurrentWeather;
+export default memo(CurrentWeather);

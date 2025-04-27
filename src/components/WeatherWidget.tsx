@@ -6,7 +6,7 @@ import WeatherChart from './WeatherChart';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 
-const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
+const REFRESH_INTERVAL = 15 * 60 * 1000; // 10 minutes in milliseconds
 
 const WeatherWidget: React.FC = () => {
   const [currentWeather, setCurrentWeather] = useState<CurrentWeatherData | null>(null);
@@ -15,9 +15,11 @@ const WeatherWidget: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchWeatherData = useCallback(async () => {
+  const fetchWeatherData = useCallback(async (refreshOnly = false) => {
     try {
-      setLoading(true);
+      if (!refreshOnly) {
+        setLoading(true);
+      }
       setError(null);
       
       const [currentData, forecastData] = await Promise.all([
@@ -33,14 +35,15 @@ const WeatherWidget: React.FC = () => {
       setError('Failed to fetch weather data. Please try again later.');
       toast.error('Failed to fetch weather data');
     } finally {
-      setLoading(false);
+      if (!refreshOnly) {
+        setLoading(false);
+      }
     }
   }, []);
   
   useEffect(() => {
     fetchWeatherData();
     
-    // Set up auto-refresh every 10 minutes
     const intervalId = setInterval(fetchWeatherData, REFRESH_INTERVAL);
     
     return () => clearInterval(intervalId);
@@ -68,7 +71,7 @@ const WeatherWidget: React.FC = () => {
         <CurrentWeather 
           data={currentWeather!} 
           isLoading={loading} 
-          onRefresh={fetchWeatherData} 
+          onRefresh={() => fetchWeatherData(true)} 
         />
         
         <WeatherChart data={forecast} isLoading={loading} />
