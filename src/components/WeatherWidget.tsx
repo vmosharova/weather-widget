@@ -6,7 +6,7 @@ import WeatherChart from './WeatherChart';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 
-const REFRESH_INTERVAL = 15 * 60 * 1000; // 10 minutes in milliseconds
+const REFRESH_INTERVAL = 20 * 60 * 1000; // 10 minutes in milliseconds
 
 const WeatherWidget: React.FC = () => {
   const [currentWeather, setCurrentWeather] = useState<CurrentWeatherData | null>(null);

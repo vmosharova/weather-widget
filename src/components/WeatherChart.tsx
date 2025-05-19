@@ -288,9 +288,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
                   fill: '#FFFFFF',
                   fontSize: 12,
                   fontWeight: 'bold',
-                  backgroundColor: '#60A5FA',
-                  padding: 3,
-                  borderRadius: 2
                 }}
               />
             )}
