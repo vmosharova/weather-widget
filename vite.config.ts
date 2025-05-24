@@ -7,7 +7,10 @@ export default defineConfig(() => ({
     host: "::",
     port: 8080,
   },
-  plugins: [react()],
+  base: '/weather-widget/',
+  plugins: [
+    react(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
