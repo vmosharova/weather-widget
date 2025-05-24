@@ -121,8 +121,32 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
     return <div className="p-4 text-gray-300">No forecast data available</div>;
   }
 
-  // Get current timestamp for "Now" line
-  const now = new Date().toISOString();
+  // Find the timestamp for "Now" line that's within the chart data range for today
+  const today = new Date();
+  const now = today.toISOString();
+  
+  // Get the current day in Berlin timezone to check if the "Now" line should be displayed
+  const currentDay = formatBerlinDay(now);
+  
+  // Find the closest forecast point to the current time to ensure the line appears properly
+  let closestTimestamp = now;
+  if (chartData.length > 0) {
+    const todayData = chartData.filter(item => item.formattedDay === currentDay);
+    if (todayData.length > 0) {
+      // Find the closest timestamp to current time
+      const currentTime = today.getTime();
+      let minDiff = Infinity;
+      
+      todayData.forEach(item => {
+        const itemTime = new Date(item.timestamp).getTime();
+        const diff = Math.abs(itemTime - currentTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestTimestamp = item.timestamp;
+        }
+      });
+    }
+  }
 
   return (
     <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
@@ -252,18 +276,21 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
               />
             ))}
 
-            {/* "Now" line */}
-            <ReferenceLine
-              x={now}
-              stroke="#94A3B8"
-              strokeWidth={2}
-              label={{
-                value: 'Now',
-                position: 'top',
-                fill: '#94A3B8',
-                fontSize: 12
-              }}
-            />
+            {/* "Now" line - only displayed for today */}
+            {chartData.some(entry => entry.formattedDay === currentDay) && (
+              <ReferenceLine
+                x={closestTimestamp}
+                stroke="#60A5FA" 
+                strokeWidth={3}
+                isFront={true}
+                label={{
+                  position: 'insideTop',
+                  fill: '#FFFFFF',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                }}
+              />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
