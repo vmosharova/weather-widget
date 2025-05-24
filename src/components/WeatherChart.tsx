@@ -185,10 +185,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
               tick={{ fontSize: 12, fill: "#94A3B8" }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(temp) => `${Math.round(temp)}°`}
+              tickFormatter={(temp) => `${Math.round(temp)} °`}
             />
             <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}°C`, 'Temperature']}
+              formatter={(value: number) => [`${value.toFixed(1)}° C`, 'Temperature']}
               labelFormatter={(label) => {
                 const time = formatBerlinTime(label, 'HH:mm');
                 const day = formatBerlinDay(label);
@@ -245,7 +245,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
                               fontSize={12}
                               fontWeight="bold"
                             >
-                              {Math.round(entry.temperature)}°
+                              {Math.round(entry.temperature)} °
                             </text>
                           </g>
                         );

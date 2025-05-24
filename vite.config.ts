@@ -7,21 +7,13 @@ export default defineConfig(() => ({
     host: "::",
     port: 8080,
   },
+  base: '/weather-widget/',
   plugins: [
     react(),
   ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  build: {
-    outDir: 'dist',
-    assetsInlineLimit: Infinity, // inline everything
-    rollupOptions: {
-      output: {
-        manualChunks: () => 'everything.js', // single bundle
-      },
     },
   },
 }));
