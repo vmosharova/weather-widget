@@ -34,7 +34,7 @@ const getTemperatureColor = (temp: number): string => {
 };
 
 const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoading }) => {
-  const WeatherIcon = getWeatherIcon(currentWeather?.icon);
+  const WeatherIcon = getWeatherIcon(currentWeather?.icon || 'clear-day');
   const chartData = useMemo(() => {
     if (!data || !data.length) return [];
     
@@ -154,22 +154,24 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   return (
     <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
       {/* Current Weather Section */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center">
-          <WeatherIcon size={48} className="text-blue-400 mr-3" />
-          <div className="text-5xl font-bold text-white">{Math.round(currentWeather?.temperature || 0)}°</div>
-          <div className="ml-3">
-            <div className="text-lg text-gray-200">
-              {getWeatherDescription(currentWeather?.icon)}
-            </div>
-            <div className="text-xs text-gray-400">
-              {currentWeather?.timestamp ? (
-                <>Weather observation recorded at: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
-              ) : 'Loading...'}
+      {!isLoading && currentWeather && (
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <WeatherIcon size={48} className="text-blue-400 mr-3" />
+            <div className="text-5xl font-bold text-white">{Math.round(currentWeather.temperature || 0)}°</div>
+            <div className="ml-3">
+              <div className="text-lg text-gray-200">
+                {getWeatherDescription(currentWeather.icon)}
+              </div>
+              <div className="text-xs text-gray-400">
+                {currentWeather.timestamp ? (
+                  <>Weather observation recorded at: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
+                ) : 'Loading...'}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
       
       <h3 className="text-sm font-medium mb-2 text-white">3-Day Temperature Forecast</h3>
       <div className="h-[250px]">
@@ -314,6 +316,36 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             )}
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+      
+      {/* Precipitation bars below chart */}
+      <div>
+        <div className="h-8 flex items-end justify-start" style={{ marginLeft: '20px', marginRight: '20px' }}>
+          {chartData.map((item, index) => {
+            const height = Math.max((item.precipitationProbability / 100) * 24, item.precipitationProbability > 0 ? 2 : 0);
+            const totalWidth = chartData.length > 0 ? (100 / chartData.length) : 0;
+            return (
+              <div
+                key={`precip-${index}`}
+                className="flex flex-col items-center justify-end"
+                style={{ 
+                  width: `${totalWidth}%`,
+                  height: '32px'
+                }}
+              >
+                <div
+                  className="bg-blue-500 opacity-70 rounded-t-sm"
+                  style={{ 
+                    height: `${height}px`,
+                    width: '6px',
+                    minHeight: item.precipitationProbability > 0 ? '2px' : '0px'
+                  }}
+                  title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
