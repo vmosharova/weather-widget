@@ -98,15 +98,15 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
     return filtered;
   }, [data]);
   
-  const dayTicks = useMemo(() => {
+  const hourlyTicks = useMemo(() => {
     if (!chartData.length) return [];
     
     const ticks: string[] = [];
-    let currentDay = '';
+    const targetHours = ['00', '06', '12', '18'];
     
     chartData.forEach(item => {
-      if (item.formattedDay !== currentDay) {
-        currentDay = item.formattedDay;
+      const hour = formatBerlinTime(item.timestamp, 'HH');
+      if (targetHours.includes(hour)) {
         ticks.push(item.timestamp);
       }
     });
@@ -173,12 +173,12 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </div>
       )}
       
-      <h3 className="text-sm font-medium mb-2 text-white">3-Day Temperature Forecast</h3>
-      <div className="h-[250px]">
+      <h3 className="text-sm font-medium mb-4 text-white" style={{ marginTop: '20px' }}>3-Day Temperature Forecast</h3>
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 30, right: 20, left: 0, bottom: 30 }}
+            margin={{ top: 50, right: 20, left: 0, bottom: 30 }}
           >
             <defs>
               {/* Temperature gradient from top to bottom */}
@@ -198,7 +198,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             <XAxis
               dataKey="timestamp"
               tickFormatter={(tick) => formatBerlinTime(tick, 'HH:mm')}
-              ticks={dayTicks}
+              ticks={hourlyTicks}
               tick={{ fontSize: 12, fill: "#94A3B8" }}
               axisLine={{ stroke: '#475569' }}
               tickLine={false}
@@ -282,22 +282,36 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               return null;
             })}
             
-            {/* Day markers */}
-            {dayTicks.map((tick, index) => (
-              <ReferenceLine
-                key={`day-${index}`}
-                x={tick}
-                stroke="#475569"
-                strokeDasharray="3 3"
-                label={{
-                  value: formatBerlinDay(tick),
-                  position: 'top',
-                  fill: '#94A3B8',
-                  fontSize: 12,
-                  offset: 20
-                }}
-              />
-            ))}
+            {/* Day labels positioned above 12:00 timestamps */}
+            {hourlyTicks
+              .filter(tick => formatBerlinTime(tick, 'HH') === '12')
+              .map((tick, index) => (
+                <ReferenceLine
+                  key={`day-label-${index}`}
+                  x={tick}
+                  stroke="transparent"
+                  label={{
+                    value: formatBerlinDay(tick),
+                    position: 'top',
+                    fill: '#94A3B8',
+                    fontSize: 14,
+                    offset: 35
+                  }}
+                />
+              ))}
+
+            {/* Day start markers - tiny vertical lines at 00:00 */}
+            {hourlyTicks
+              .filter(tick => formatBerlinTime(tick, 'HH') === '00')
+              .map((tick, index) => (
+                <ReferenceLine
+                  key={`day-start-${index}`}
+                  x={tick}
+                  stroke="#475569"
+                  strokeWidth={1}
+                  strokeDasharray="2 2"
+                />
+              ))}
 
             {/* "Now" line - only displayed for today */}
             {chartData.some(entry => entry.formattedDay === currentDay) && (
@@ -319,7 +333,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       </div>
       
       {/* Precipitation bars below chart */}
-      <div className="relative" style={{ marginLeft: '50px', marginRight: '20px' }}>
+      <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
         <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
           {/* Percentage labels */}
           <div className="absolute -left-6" style={{ fontSize: '12px', color: '#9CA3AF', top: '-12px' }}>100</div>
@@ -328,7 +342,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
           {/* Precipitation bars */}
           <div className="h-full flex items-end justify-start absolute inset-0">
             {chartData.map((item, index) => {
-              const height = Math.max((item.precipitationProbability / 100) * 30, item.precipitationProbability > 0 ? 2 : 0);
               const totalWidth = chartData.length > 0 ? (100 / chartData.length) : 0;
               return (
                 <div
@@ -339,20 +352,38 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     height: '30px'
                   }}
                 >
-                  <div
-                    className="bg-blue-500 opacity-70 rounded-t-sm"
-                    style={{ 
-                      height: `${height}px`,
-                      width: '6px',
-                      minHeight: item.precipitationProbability > 0 ? '2px' : '0px'
-                    }}
-                    title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
-                  />
+                  {item.precipitationProbability >= 10 && (
+                    <div
+                      className="bg-blue-500 opacity-70 rounded-t-sm"
+                      style={{ 
+                        height: `${(item.precipitationProbability / 100) * 30}px`,
+                        width: '6px',
+                        minHeight: '2px'
+                      }}
+                      title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
+                    />
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
+        
+        {/* "Now" line extension to precipitation chart */}
+        {chartData.some(entry => entry.formattedDay === currentDay) && (() => {
+          const nowIndex = chartData.findIndex(item => item.timestamp === closestTimestamp);
+          const leftPosition = nowIndex >= 0 ? (nowIndex / (chartData.length - 1)) * 100 : 0;
+          return (
+            <div 
+              className="absolute top-0 bottom-0 border-l-2 border-blue-400" 
+              style={{ 
+                left: `${leftPosition}%`,
+                width: '2px',
+                pointerEvents: 'none'
+              }}
+            />
+          );
+        })()}
       </div>
     </div>
   );
