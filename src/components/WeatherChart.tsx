@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
+import PrecipitationChart from './PrecipitationChart';
 
 interface WeatherChartProps {
   data: ForecastData[];
@@ -257,7 +258,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     dot={(props: any) => {
                       const { cx, cy, payload } = props;
                       if (payload.timestamp === entry.timestamp) {
-                        const labelY = entry.isLow ? cy + 25 : cy - 25;
+                        const labelY = entry.isLow ? cy - 25 : cy - 25;
                         return (
                           <g key={`temp-label-${index}`}>
                             <text
@@ -318,13 +319,12 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               <ReferenceLine
                 x={closestTimestamp}
                 stroke="#60A5FA" 
-                strokeWidth={3}
+                strokeWidth={2}
                 isFront={true}
                 label={{
                   position: 'insideTop',
                   fill: '#FFFFFF',
                   fontSize: 12,
-                  fontWeight: 'bold',
                 }}
               />
             )}
@@ -332,59 +332,12 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </ResponsiveContainer>
       </div>
       
-      {/* Precipitation bars below chart */}
-      <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
-        <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
-          {/* Percentage labels */}
-          <div className="absolute -left-6" style={{ fontSize: '12px', color: '#9CA3AF', top: '-12px' }}>100</div>
-          <div className="absolute -left-4" style={{ fontSize: '12px', color: '#9CA3AF', bottom: '-8px' }}>0</div>
-          
-          {/* Precipitation bars */}
-          <div className="h-full flex items-end justify-start absolute inset-0">
-            {chartData.map((item, index) => {
-              const totalWidth = chartData.length > 0 ? (100 / chartData.length) : 0;
-              return (
-                <div
-                  key={`precip-${index}`}
-                  className="flex flex-col items-center justify-end"
-                  style={{ 
-                    width: `${totalWidth}%`,
-                    height: '30px'
-                  }}
-                >
-                  {item.precipitationProbability >= 10 && (
-                    <div
-                      className="bg-blue-500 opacity-70 rounded-t-sm"
-                      style={{ 
-                        height: `${(item.precipitationProbability / 100) * 30}px`,
-                        width: '6px',
-                        minHeight: '2px'
-                      }}
-                      title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* "Now" line extension to precipitation chart */}
-        {chartData.some(entry => entry.formattedDay === currentDay) && (() => {
-          const nowIndex = chartData.findIndex(item => item.timestamp === closestTimestamp);
-          const leftPosition = nowIndex >= 0 ? (nowIndex / (chartData.length - 1)) * 100 : 0;
-          return (
-            <div 
-              className="absolute top-0 bottom-0 border-l-2 border-blue-400" 
-              style={{ 
-                left: `${leftPosition}%`,
-                width: '2px',
-                pointerEvents: 'none'
-              }}
-            />
-          );
-        })()}
-      </div>
+      <PrecipitationChart 
+        data={chartData} 
+        isLoading={isLoading} 
+        closestTimestamp={closestTimestamp} 
+        currentDay={currentDay} 
+      />
     </div>
   );
 };
