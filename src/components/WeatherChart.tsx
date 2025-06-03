@@ -82,18 +82,36 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       };
     });
     
-    // Filter out duplicate low points that are near each other
+    // Filter out duplicate high/low points - only keep first occurrence per day
     const seen = new Set<string>();
     const filtered = enhancedData.map((point, index) => {
-      if (point.isLow) {
-        const key = `${point.formattedDay}-low`;
-        if (seen.has(key)) {
-          // This is a duplicate low point, so don't mark it as special
-          return { ...point, isLow: false, isHighOrLow: point.isHigh };
+      let newIsHigh = point.isHigh;
+      let newIsLow = point.isLow;
+      
+      if (point.isHigh) {
+        const highKey = `${point.formattedDay}-high`;
+        if (seen.has(highKey)) {
+          newIsHigh = false;
+        } else {
+          seen.add(highKey);
         }
-        seen.add(key);
       }
-      return point;
+      
+      if (point.isLow) {
+        const lowKey = `${point.formattedDay}-low`;
+        if (seen.has(lowKey)) {
+          newIsLow = false;
+        } else {
+          seen.add(lowKey);
+        }
+      }
+      
+      return { 
+        ...point, 
+        isHigh: newIsHigh,
+        isLow: newIsLow,
+        isHighOrLow: newIsHigh || newIsLow
+      };
     });
     
     return filtered;
@@ -310,7 +328,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     position: 'top',
                     fill: '#94A3B8',
                     fontSize: 14,
-                    offset: 35
+                    offset: 30
                   }}
                 />
               ))}
