@@ -211,21 +211,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               tickLine={false}
               tickFormatter={(temp) => `${Math.round(temp)} °`}
             />
-            <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}° C`, 'Temperature']}
-              labelFormatter={(label) => {
-                const time = formatBerlinTime(label, 'HH:mm');
-                const day = formatBerlinDay(label);
-                return `${day} ${time}`;
-              }}
-              contentStyle={{ 
-                backgroundColor: 'rgba(30,41,59,0.9)', 
-                border: '1px solid #475569',
-                borderRadius: '4px',
-                fontSize: '12px',
-                color: '#E2E8F0'
-              }}
-            />
             
             {/* Area chart with temperature gradient */}
             <Area

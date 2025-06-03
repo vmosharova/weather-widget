@@ -51,7 +51,7 @@ const WeatherWidget: React.FC = () => {
   return (
     <div className="mx-auto p-3 bg-slate-900/90 rounded-xl shadow-lg text-white border border-slate-800 backdrop-blur-xl">
       <Toaster position="top-right" />
-      <header className="mb-3 flex justify-between items-center">
+      <header className="mb-3 justify-between items-center">
         <h1 className="text-xl font-bold text-white">Berlin Weather</h1>
         {lastUpdated && (
           <p className="text-xs text-gray-400">
