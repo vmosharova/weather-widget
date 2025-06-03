@@ -182,16 +182,45 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             margin={{ top: 50, right: 20, left: 0, bottom: 30 }}
           >
             <defs>
-              {/* Temperature gradient from top to bottom */}
+              {/* Temperature gradient from top to bottom - absolute temperature based */}
               <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#991b1b" stopOpacity={0.8} />
-                <stop offset="15%" stopColor="#ef4444" stopOpacity={0.8} />
-                <stop offset="30%" stopColor="#FB923C" stopOpacity={0.7} />
-                <stop offset="45%" stopColor="#FEF08A" stopOpacity={0.7} />
-                <stop offset="60%" stopColor="#4ade80" stopOpacity={0.7} />
-                <stop offset="75%" stopColor="#22D3EE" stopOpacity={0.7} />
-                <stop offset="90%" stopColor="#0EA5E9" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#9b87f5" stopOpacity={0.5} />
+                {(() => {
+                  const temps = chartData.map(d => d.temperature);
+                  const minTemp = Math.min(...temps);
+                  const maxTemp = Math.max(...temps);
+                  const tempRange = maxTemp - minTemp;
+                  
+                  const getColorForTemp = (temp: number) => {
+                    if (temp < -10) return '#0F0A1A'; // very dark purple
+                    if (temp < -5) return '#1A1F2C';  // dark purple
+                    if (temp < -2) return '#6366f1';  // indigo
+                    if (temp < 0) return '#9b87f5';   // purple
+                    if (temp < 2) return '#3b82f6';   // bright blue
+                    if (temp < 5) return '#0EA5E9';   // sky blue
+                    if (temp < 8) return '#06b6d4';   // cyan
+                    if (temp < 10) return '#22D3EE';  // turquoise
+                    if (temp < 12) return '#10b981';  // emerald
+                    if (temp < 15) return '#4ade80';  // green
+                    if (temp < 17) return '#84cc16';  // lime
+                    if (temp < 20) return '#FEF08A';  // yellow
+                    if (temp < 22) return '#fbbf24';  // amber
+                    if (temp < 25) return '#FB923C';  // orange
+                    if (temp < 27) return '#f97316';  // orange-red
+                    if (temp < 30) return '#ef4444';  // red
+                    if (temp < 32) return '#dc2626';  // bright red
+                    if (temp < 35) return '#991b1b';  // dark red
+                    return '#7f1d1d';                 // very dark red
+                  };
+                  
+                  const stops = [];
+                  const topColor = getColorForTemp(maxTemp);
+                  const bottomColor = getColorForTemp(minTemp);
+                  
+                  stops.push(<stop key="0" offset="0%" stopColor={topColor} stopOpacity={0.8} />);
+                  stops.push(<stop key="100" offset="100%" stopColor={bottomColor} stopOpacity={0.5} />);
+                  
+                  return stops;
+                })()}
               </linearGradient>
             </defs>
             
