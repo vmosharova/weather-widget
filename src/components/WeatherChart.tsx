@@ -319,32 +319,39 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       </div>
       
       {/* Precipitation bars below chart */}
-      <div>
-        <div className="h-8 flex items-end justify-start" style={{ marginLeft: '20px', marginRight: '20px' }}>
-          {chartData.map((item, index) => {
-            const height = Math.max((item.precipitationProbability / 100) * 24, item.precipitationProbability > 0 ? 2 : 0);
-            const totalWidth = chartData.length > 0 ? (100 / chartData.length) : 0;
-            return (
-              <div
-                key={`precip-${index}`}
-                className="flex flex-col items-center justify-end"
-                style={{ 
-                  width: `${totalWidth}%`,
-                  height: '32px'
-                }}
-              >
+      <div className="relative" style={{ marginLeft: '50px', marginRight: '20px' }}>
+        <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
+          {/* Percentage labels */}
+          <div className="absolute -left-6" style={{ fontSize: '12px', color: '#9CA3AF', top: '-12px' }}>100</div>
+          <div className="absolute -left-4" style={{ fontSize: '12px', color: '#9CA3AF', bottom: '-8px' }}>0</div>
+          
+          {/* Precipitation bars */}
+          <div className="h-full flex items-end justify-start absolute inset-0">
+            {chartData.map((item, index) => {
+              const height = Math.max((item.precipitationProbability / 100) * 30, item.precipitationProbability > 0 ? 2 : 0);
+              const totalWidth = chartData.length > 0 ? (100 / chartData.length) : 0;
+              return (
                 <div
-                  className="bg-blue-500 opacity-70 rounded-t-sm"
+                  key={`precip-${index}`}
+                  className="flex flex-col items-center justify-end"
                   style={{ 
-                    height: `${height}px`,
-                    width: '6px',
-                    minHeight: item.precipitationProbability > 0 ? '2px' : '0px'
+                    width: `${totalWidth}%`,
+                    height: '30px'
                   }}
-                  title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
-                />
-              </div>
-            );
-          })}
+                >
+                  <div
+                    className="bg-blue-500 opacity-70 rounded-t-sm"
+                    style={{ 
+                      height: `${height}px`,
+                      width: '6px',
+                      minHeight: item.precipitationProbability > 0 ? '2px' : '0px'
+                    }}
+                    title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
