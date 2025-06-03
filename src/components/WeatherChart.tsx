@@ -1,10 +1,13 @@
 
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { ForecastData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
+import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
+import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
+import PrecipitationChart from './PrecipitationChart';
 
 interface WeatherChartProps {
   data: ForecastData[];
+  currentWeather: CurrentWeatherData | null;
   isLoading: boolean;
 }
 
@@ -31,7 +34,8 @@ const getTemperatureColor = (temp: number): string => {
   return '#991b1b';               // dark red
 };
 
-const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
+const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoading }) => {
+  const WeatherIcon = getWeatherIcon(currentWeather?.icon || 'clear-day');
   const chartData = useMemo(() => {
     if (!data || !data.length) return [];
     
@@ -78,32 +82,50 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
       };
     });
     
-    // Filter out duplicate low points that are near each other
+    // Filter out duplicate high/low points - only keep first occurrence per day
     const seen = new Set<string>();
     const filtered = enhancedData.map((point, index) => {
-      if (point.isLow) {
-        const key = `${point.formattedDay}-low`;
-        if (seen.has(key)) {
-          // This is a duplicate low point, so don't mark it as special
-          return { ...point, isLow: false, isHighOrLow: point.isHigh };
+      let newIsHigh = point.isHigh;
+      let newIsLow = point.isLow;
+      
+      if (point.isHigh) {
+        const highKey = `${point.formattedDay}-high`;
+        if (seen.has(highKey)) {
+          newIsHigh = false;
+        } else {
+          seen.add(highKey);
         }
-        seen.add(key);
       }
-      return point;
+      
+      if (point.isLow) {
+        const lowKey = `${point.formattedDay}-low`;
+        if (seen.has(lowKey)) {
+          newIsLow = false;
+        } else {
+          seen.add(lowKey);
+        }
+      }
+      
+      return { 
+        ...point, 
+        isHigh: newIsHigh,
+        isLow: newIsLow,
+        isHighOrLow: newIsHigh || newIsLow
+      };
     });
     
     return filtered;
   }, [data]);
   
-  const dayTicks = useMemo(() => {
+  const hourlyTicks = useMemo(() => {
     if (!chartData.length) return [];
     
     const ticks: string[] = [];
-    let currentDay = '';
+    const targetHours = ['00', '06', '12', '18'];
     
     chartData.forEach(item => {
-      if (item.formattedDay !== currentDay) {
-        currentDay = item.formattedDay;
+      const hour = formatBerlinTime(item.timestamp, 'HH');
+      if (targetHours.includes(hour)) {
         ticks.push(item.timestamp);
       }
     });
@@ -150,24 +172,73 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
 
   return (
     <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
-      <h3 className="text-sm font-medium mb-2 text-white">3-Day Temperature Forecast</h3>
-      <div className="h-[250px]">
+      {/* Current Weather Section */}
+      {!isLoading && currentWeather && (
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <WeatherIcon size={48} className="text-blue-400 mr-3" />
+            <div className="text-5xl font-bold text-white">{Math.round(currentWeather.temperature || 0)}°</div>
+            <div className="ml-3">
+              <div className="text-lg text-gray-200">
+                {getWeatherDescription(currentWeather.icon)}
+              </div>
+              <div className="text-xs text-gray-400">
+                {currentWeather.timestamp ? (
+                  <>Weather observation recorded at: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
+                ) : 'Loading...'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <h3 className="text-sm font-medium mb-4 text-white" style={{ marginTop: '20px' }}>3-Day Temperature Forecast</h3>
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 30, right: 20, left: 0, bottom: 30 }}
+            margin={{ top: 50, right: 20, left: 0, bottom: 30 }}
           >
             <defs>
-              {/* Temperature gradient from top to bottom */}
+              {/* Temperature gradient from top to bottom - absolute temperature based */}
               <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#991b1b" stopOpacity={0.8} />
-                <stop offset="15%" stopColor="#ef4444" stopOpacity={0.8} />
-                <stop offset="30%" stopColor="#FB923C" stopOpacity={0.7} />
-                <stop offset="45%" stopColor="#FEF08A" stopOpacity={0.7} />
-                <stop offset="60%" stopColor="#4ade80" stopOpacity={0.7} />
-                <stop offset="75%" stopColor="#22D3EE" stopOpacity={0.7} />
-                <stop offset="90%" stopColor="#0EA5E9" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#9b87f5" stopOpacity={0.5} />
+                {(() => {
+                  const temps = chartData.map(d => d.temperature);
+                  const minTemp = Math.min(...temps);
+                  const maxTemp = Math.max(...temps);
+                  const tempRange = maxTemp - minTemp;
+                  
+                  const getColorForTemp = (temp: number) => {
+                    if (temp < -10) return '#0F0A1A'; // very dark purple
+                    if (temp < -5) return '#1A1F2C';  // dark purple
+                    if (temp < -2) return '#6366f1';  // indigo
+                    if (temp < 0) return '#9b87f5';   // purple
+                    if (temp < 2) return '#3b82f6';   // bright blue
+                    if (temp < 5) return '#0EA5E9';   // sky blue
+                    if (temp < 8) return '#06b6d4';   // cyan
+                    if (temp < 10) return '#22D3EE';  // turquoise
+                    if (temp < 12) return '#10b981';  // emerald
+                    if (temp < 15) return '#4ade80';  // green
+                    if (temp < 17) return '#84cc16';  // lime
+                    if (temp < 20) return '#FEF08A';  // yellow
+                    if (temp < 22) return '#fbbf24';  // amber
+                    if (temp < 25) return '#FB923C';  // orange
+                    if (temp < 27) return '#f97316';  // orange-red
+                    if (temp < 30) return '#ef4444';  // red
+                    if (temp < 32) return '#dc2626';  // bright red
+                    if (temp < 35) return '#991b1b';  // dark red
+                    return '#7f1d1d';                 // very dark red
+                  };
+                  
+                  const stops = [];
+                  const topColor = getColorForTemp(maxTemp);
+                  const bottomColor = getColorForTemp(minTemp);
+                  
+                  stops.push(<stop key="0" offset="0%" stopColor={topColor} stopOpacity={0.8} />);
+                  stops.push(<stop key="100" offset="100%" stopColor={bottomColor} stopOpacity={0.5} />);
+                  
+                  return stops;
+                })()}
               </linearGradient>
             </defs>
             
@@ -175,32 +246,17 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
             <XAxis
               dataKey="timestamp"
               tickFormatter={(tick) => formatBerlinTime(tick, 'HH:mm')}
-              ticks={dayTicks}
-              tick={{ fontSize: 12, fill: "#94A3B8" }}
+              ticks={hourlyTicks}
+              tick={{ fontSize: 12, fill: "#94A3B8", dy: 4 }}
               axisLine={{ stroke: '#475569' }}
               tickLine={false}
             />
             <YAxis
               domain={['dataMin - 2', 'dataMax + 2']}
-              tick={{ fontSize: 12, fill: "#94A3B8" }}
+              tick={{ fontSize: 12, fill: "#94A3B8", dy: -8 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(temp) => `${Math.round(temp)} °`}
-            />
-            <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}° C`, 'Temperature']}
-              labelFormatter={(label) => {
-                const time = formatBerlinTime(label, 'HH:mm');
-                const day = formatBerlinDay(label);
-                return `${day} ${time}`;
-              }}
-              contentStyle={{ 
-                backgroundColor: 'rgba(30,41,59,0.9)', 
-                border: '1px solid #475569',
-                borderRadius: '4px',
-                fontSize: '12px',
-                color: '#E2E8F0'
-              }}
             />
             
             {/* Area chart with temperature gradient */}
@@ -234,7 +290,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
                     dot={(props: any) => {
                       const { cx, cy, payload } = props;
                       if (payload.timestamp === entry.timestamp) {
-                        const labelY = entry.isLow ? cy + 25 : cy - 25;
+                        const labelY = entry.isLow ? cy - 25 : cy - 25;
                         return (
                           <g key={`temp-label-${index}`}>
                             <text
@@ -259,41 +315,61 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
               return null;
             })}
             
-            {/* Day markers */}
-            {dayTicks.map((tick, index) => (
-              <ReferenceLine
-                key={`day-${index}`}
-                x={tick}
-                stroke="#475569"
-                strokeDasharray="3 3"
-                label={{
-                  value: formatBerlinDay(tick),
-                  position: 'top',
-                  fill: '#94A3B8',
-                  fontSize: 12,
-                  offset: 20
-                }}
-              />
-            ))}
+            {/* Day labels positioned above 12:00 timestamps */}
+            {hourlyTicks
+              .filter(tick => formatBerlinTime(tick, 'HH') === '12')
+              .map((tick, index) => (
+                <ReferenceLine
+                  key={`day-label-${index}`}
+                  x={tick}
+                  stroke="transparent"
+                  label={{
+                    value: formatBerlinDay(tick),
+                    position: 'top',
+                    fill: '#94A3B8',
+                    fontSize: 14,
+                    offset: 30
+                  }}
+                />
+              ))}
+
+            {/* Day start markers - tiny vertical lines at 00:00 */}
+            {hourlyTicks
+              .filter(tick => formatBerlinTime(tick, 'HH') === '00')
+              .map((tick, index) => (
+                <ReferenceLine
+                  key={`day-start-${index}`}
+                  x={tick}
+                  stroke="#475569"
+                  strokeWidth={1}
+                  strokeDasharray="2 2"
+                />
+              ))}
 
             {/* "Now" line - only displayed for today */}
             {chartData.some(entry => entry.formattedDay === currentDay) && (
               <ReferenceLine
                 x={closestTimestamp}
                 stroke="#60A5FA" 
-                strokeWidth={3}
+                strokeWidth={2}
                 isFront={true}
                 label={{
                   position: 'insideTop',
                   fill: '#FFFFFF',
                   fontSize: 12,
-                  fontWeight: 'bold',
                 }}
               />
             )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      
+      <PrecipitationChart 
+        data={chartData} 
+        isLoading={isLoading} 
+        closestTimestamp={closestTimestamp} 
+        currentDay={currentDay} 
+      />
     </div>
   );
 };

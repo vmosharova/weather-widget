@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getCurrentWeather, getWeatherForecast, CurrentWeatherData, ForecastData } from '@/services/brightSkyService';
-import CurrentWeather from './CurrentWeather';
 import WeatherChart from './WeatherChart';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 
-const REFRESH_INTERVAL = 20 * 60 * 1000; // 10 minutes in milliseconds
+const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutes in milliseconds
 
 const WeatherWidget: React.FC = () => {
   const [currentWeather, setCurrentWeather] = useState<CurrentWeatherData | null>(null);
@@ -50,9 +49,9 @@ const WeatherWidget: React.FC = () => {
   }, [fetchWeatherData]);
   
   return (
-    <div className="max-w-5xl mx-auto p-3 bg-slate-900/90 rounded-xl shadow-lg text-white border border-slate-800 backdrop-blur-xl">
+    <div className="mx-auto p-3 bg-slate-900/90 rounded-xl shadow-lg text-white border border-slate-800 backdrop-blur-xl">
       <Toaster position="top-right" />
-      <header className="mb-3 flex justify-between items-center">
+      <header className="mb-3 justify-between items-center">
         <h1 className="text-xl font-bold text-white">Berlin Weather</h1>
         {lastUpdated && (
           <p className="text-xs text-gray-400">
@@ -67,15 +66,7 @@ const WeatherWidget: React.FC = () => {
         </div>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <CurrentWeather 
-          data={currentWeather!} 
-          isLoading={loading} 
-          onRefresh={() => fetchWeatherData(true)} 
-        />
-        
-        <WeatherChart data={forecast} isLoading={loading} />
-      </div>
+      <WeatherChart data={forecast} currentWeather={currentWeather} isLoading={loading} />
     </div>
   );
 };
