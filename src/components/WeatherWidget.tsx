@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getCurrentWeather, getWeatherForecast, CurrentWeatherData, ForecastData } from '@/services/brightSkyService';
-import CurrentWeather from './CurrentWeather';
 import WeatherChart from './WeatherChart';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
@@ -67,15 +66,7 @@ const WeatherWidget: React.FC = () => {
         </div>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <CurrentWeather 
-          data={currentWeather!} 
-          isLoading={loading} 
-          onRefresh={() => fetchWeatherData(true)} 
-        />
-        
-        <WeatherChart data={forecast} isLoading={loading} />
-      </div>
+      <WeatherChart data={forecast} currentWeather={currentWeather} isLoading={loading} />
     </div>
   );
 };

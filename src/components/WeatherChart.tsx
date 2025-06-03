@@ -1,10 +1,12 @@
 
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { ForecastData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
+import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
+import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
 
 interface WeatherChartProps {
   data: ForecastData[];
+  currentWeather: CurrentWeatherData | null;
   isLoading: boolean;
 }
 
@@ -31,7 +33,8 @@ const getTemperatureColor = (temp: number): string => {
   return '#991b1b';               // dark red
 };
 
-const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
+const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoading }) => {
+  const WeatherIcon = getWeatherIcon(currentWeather?.icon);
   const chartData = useMemo(() => {
     if (!data || !data.length) return [];
     
@@ -150,6 +153,24 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, isLoading }) => {
 
   return (
     <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
+      {/* Current Weather Section */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <WeatherIcon size={48} className="text-blue-400 mr-3" />
+          <div className="text-5xl font-bold text-white">{Math.round(currentWeather?.temperature || 0)}°</div>
+          <div className="ml-3">
+            <div className="text-lg text-gray-200">
+              {getWeatherDescription(currentWeather?.icon)}
+            </div>
+            <div className="text-xs text-gray-400">
+              {currentWeather?.timestamp ? (
+                <>Weather observation recorded at: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
+              ) : 'Loading...'}
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <h3 className="text-sm font-medium mb-2 text-white">3-Day Temperature Forecast</h3>
       <div className="h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
