@@ -247,13 +247,13 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               dataKey="timestamp"
               tickFormatter={(tick) => formatBerlinTime(tick, 'HH:mm')}
               ticks={hourlyTicks}
-              tick={{ fontSize: 12, fill: "#94A3B8" }}
+              tick={{ fontSize: 12, fill: "#94A3B8", dy: 4 }}
               axisLine={{ stroke: '#475569' }}
               tickLine={false}
             />
             <YAxis
               domain={['dataMin - 2', 'dataMax + 2']}
-              tick={{ fontSize: 12, fill: "#94A3B8" }}
+              tick={{ fontSize: 12, fill: "#94A3B8", dy: -8 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(temp) => `${Math.round(temp)} °`}
