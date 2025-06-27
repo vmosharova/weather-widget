@@ -135,7 +135,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   
   if (isLoading) {
     return (
-      <div className="animate-pulse h-64 bg-slate-700/50 rounded-lg"></div>
+      <div className="animate-pulse h-full bg-slate-700/50 rounded-lg"></div>
     );
   }
   
@@ -171,20 +171,20 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   }
 
   return (
-    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full">
+    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full flex flex-col overflow-hidden">
       {/* Current Weather Section */}
       {!isLoading && currentWeather && (
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center">
-            <WeatherIcon size={48} className="text-blue-400 mr-3" />
-            <div className="text-5xl font-bold text-white">{Math.round(currentWeather.temperature || 0)}°</div>
-            <div className="ml-3">
-              <div className="text-lg text-gray-200">
+            <WeatherIcon size={32} className="text-blue-400 mr-2" />
+            <div className="text-3xl font-bold text-white">{Math.round(currentWeather.temperature || 0)}°</div>
+            <div className="ml-2">
+              <div className="text-sm text-gray-200">
                 {getWeatherDescription(currentWeather.icon)}
               </div>
               <div className="text-xs text-gray-400">
                 {currentWeather.timestamp ? (
-                  <>Weather observation recorded at: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
+                  <>Updated: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
                 ) : 'Loading...'}
               </div>
             </div>
@@ -192,8 +192,8 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </div>
       )}
       
-      <h3 className="text-sm font-medium mb-4 text-white" style={{ marginTop: '20px' }}>3-Day Temperature Forecast</h3>
-      <div className="h-[300px]">
+      <h3 className="text-sm font-medium mb-2 text-white flex-shrink-0">3-Day Temperature Forecast</h3>
+      <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
@@ -364,12 +364,14 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </ResponsiveContainer>
       </div>
       
-      <PrecipitationChart 
-        data={chartData} 
-        isLoading={isLoading} 
-        closestTimestamp={closestTimestamp} 
-        currentDay={currentDay} 
-      />
+      <div className="flex-shrink-0 mt-2">
+        <PrecipitationChart 
+          data={chartData} 
+          isLoading={isLoading} 
+          closestTimestamp={closestTimestamp} 
+          currentDay={currentDay} 
+        />
+      </div>
     </div>
   );
 };
