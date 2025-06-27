@@ -49,9 +49,9 @@ const WeatherWidget: React.FC = () => {
   }, [fetchWeatherData]);
   
   return (
-    <div className="mx-auto p-3 bg-slate-900/90 rounded-xl shadow-lg text-white border border-slate-800 backdrop-blur-xl">
+    <div className="h-full w-full p-4 bg-slate-900/90 text-white backdrop-blur-xl flex flex-col">
       <Toaster position="top-right" />
-      <header className="mb-3 justify-between items-center">
+      <header className="mb-4 flex justify-between items-center flex-shrink-0">
         <h1 className="text-xl font-bold text-white">Berlin Weather</h1>
         {lastUpdated && (
           <p className="text-xs text-gray-400">
@@ -61,12 +61,14 @@ const WeatherWidget: React.FC = () => {
       </header>
       
       {error && (
-        <div className="p-4 bg-red-900/60 text-red-200 rounded-md mb-4 border border-red-800">
+        <div className="p-4 bg-red-900/60 text-red-200 rounded-md mb-4 border border-red-800 flex-shrink-0">
           {error}
         </div>
       )}
       
-      <WeatherChart data={forecast} currentWeather={currentWeather} isLoading={loading} />
+      <div className="flex-1 min-h-0">
+        <WeatherChart data={forecast} currentWeather={currentWeather} isLoading={loading} />
+      </div>
     </div>
   );
 };
