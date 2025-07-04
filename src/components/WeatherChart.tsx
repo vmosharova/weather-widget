@@ -182,17 +182,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               <div className="text-sm text-gray-200">
                 {getWeatherDescription(currentWeather.icon)}
               </div>
-              <div className="text-xs text-gray-400">
-                {currentWeather.timestamp ? (
-                  <>Updated: {formatBerlinTime(currentWeather.timestamp, 'HH:mm')}</>
-                ) : 'Loading...'}
-              </div>
             </div>
           </div>
         </div>
       )}
       
-      <h3 className="text-sm font-medium mb-2 text-white flex-shrink-0">3-Day Temperature Forecast</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
@@ -245,7 +239,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} stroke="#475569" />
             <XAxis
               dataKey="timestamp"
-              tickFormatter={(tick) => formatBerlinTime(tick, 'HH:mm')}
+              tickFormatter={(tick) => formatBerlinTime(tick, 'HH')}
               ticks={hourlyTicks}
               tick={{ fontSize: 12, fill: "#94A3B8", dy: 4 }}
               axisLine={{ stroke: '#475569' }}
