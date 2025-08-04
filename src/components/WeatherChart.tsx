@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay, isDaytime } from '@/services/brightSkyService';
+import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
 import PrecipitationChart from './PrecipitationChart';
 
