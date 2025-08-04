@@ -171,7 +171,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   }
 
   return (
-    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full flex flex-col overflow-hidden">
+    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-[50vh] lg:h-full flex flex-col overflow-hidden">
       {/* Current Weather Section */}
       {!isLoading && currentWeather && (
         <div className="mb-2 flex items-center justify-between flex-shrink-0">
