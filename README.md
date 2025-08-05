@@ -4,6 +4,8 @@ A responsive weather widget built with React and TypeScript that displays curren
 
 **The project is deployed to [https://vmosharova.github.io/weather-widget/](https://vmosharova.github.io/weather-widget/) for demonstration.**
 
+![Weather widget screenshot](screenshot_desktop.png)
+
 ## Features
 
 - **Real-time Weather Data**: Fetches current weather and 3-day forecast from BrightSky - free open-source weather API
