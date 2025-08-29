@@ -21,19 +21,6 @@ interface EnhancedForecastData extends ForecastData {
   isLow: boolean;
 }
 
-// Color ranges for temperature with new colors
-const getTemperatureColor = (temp: number): string => {
-  if (temp < -5) return '#1A1F2C'; // dark purple
-  if (temp < 0) return '#9b87f5';  // purple
-  if (temp < 5) return '#0EA5E9';  // blue
-  if (temp < 10) return '#22D3EE'; // turquoise
-  if (temp < 15) return '#4ade80'; // green
-  if (temp < 20) return '#FEF08A'; // yellow
-  if (temp < 25) return '#FB923C'; // orange
-  if (temp < 30) return '#ef4444'; // red
-  return '#991b1b';               // dark red
-};
-
 const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoading }) => {
   const WeatherIcon = getWeatherIcon(currentWeather?.icon || 'clear-day');
   const chartData = useMemo(() => {
