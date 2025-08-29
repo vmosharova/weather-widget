@@ -6,23 +6,30 @@ A responsive weather widget built with React and TypeScript that displays curren
 
 ![Weather widget screenshot](screenshot_desktop.png)
 
+
+## Tech Stack
+
+- **Frontend**: React 18, TypeScript
+- **Styling**: Tailwind CSS, ShadcnUI
+- **Charts**: Recharts library:
+  - *AreaChart* - Main chart container
+  - *Area* - Temperature data visualization with gradient fill
+  - *XAxis/YAxis* - Time and temperature axes
+  - *CartesianGrid* - Background grid lines
+  - *ResponsiveContainer* - Responsive sizing
+  - *ReferenceLine* - "Now" line and day markers
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
+- **Build Tool**: Vite
+
 ## Features
 
 - **Real-time Weather Data**: Fetches current weather and 3-day forecast from BrightSky - free open-source weather API
 - **Interactive Charts**: Temperature trends with color-coded gradients using Recharts
 - **Precipitation Visualization**: Bar chart showing rain probability over time
-- **Responsive Design**: Optimized for both desktop and mobile devices
 - **Auto-refresh**: Updates weather data every 20 minutes
 - **Error Handling**: Graceful fallbacks when API is unavailable
 
-## Tech Stack
-
-- **Frontend**: React 18, TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **HTTP Client**: Axios
-- **Build Tool**: Vite
 
 ## Getting Started
 
@@ -57,19 +64,16 @@ pnpm dev
 src/
 ├── components/
 │   └── ui/
-│       ├── sonner.tsx               # Toast notifications
-│       ├── toast.tsx                # Toast component
-│       ├── tooltip.tsx              # Tooltip provider
-│       ├── PrecipitationChart.tsx   # Precipitation visualization
-│       ├── WeatherChart.tsx         # Main temperature chart
-│       └── WeatherWidget.tsx        # Main widget container
-├── hooks/
+│       ├── sonner.tsx              # Toast notifications
+│   ├── PrecipitationChart.tsx      # Precipitation visualization
+    ├── WeatherChart.tsx            # Temperature chart (includes nested PrecipitationChart)
+    └── WeatherWidget.tsx           # Main widget container (includes nested WeatherChart)
 ├── lib/
-│   └── utils.ts                     # Utility functions
+│   └── utils.ts                     # Utility functions for ShadcnUI (for the sonner component)
 ├── pages/
 │   └── Index.tsx                    # Main page
 ├── services/
-│   └── brightSkyService.ts          # Weather API integration
+│   └── brightSkyService.ts          # Weather API integration + fallback data
 ├── utils/
 │   └── weatherIcons.ts              # Weather icon mapping
 ```

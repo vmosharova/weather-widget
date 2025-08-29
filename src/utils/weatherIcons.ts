@@ -9,9 +9,10 @@ import {
   CloudSun,
   Sun,
   LucideIcon,
+  TriangleAlert
 } from 'lucide-react';
 
-// Map BrightSky condition/icon codes to Lucide React icons
+
 export const getWeatherIcon = (condition: string | undefined): LucideIcon => {
   if (!condition) return Sun;
   
@@ -28,6 +29,7 @@ export const getWeatherIcon = (condition: string | undefined): LucideIcon => {
     'wind': Cloud,
     'thunderstorm': CloudLightning,
     'drizzle': CloudDrizzle,
+    'some-error': TriangleAlert
   };
   
   return conditionMap[condition] || Sun;
@@ -49,6 +51,7 @@ export const getWeatherDescription = (condition: string | undefined): string => 
     'wind': 'Windy',
     'thunderstorm': 'Thunderstorm',
     'drizzle': 'Drizzle',
+    'some-error': 'Something went wrong! Look into the console'
   };
   
   return descriptions[condition] || condition.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
