@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getCurrentWeather, getWeatherForecast, CurrentWeatherData, ForecastData } from '@/services/brightSkyService';
 import WeatherChart from './WeatherChart';
-import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 
 const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutes in milliseconds
@@ -32,7 +31,6 @@ const WeatherWidget: React.FC = () => {
     } catch (err) {
       console.error('Error fetching weather data:', err);
       setError('Failed to fetch weather data. Please try again later.');
-      toast.error('Failed to fetch weather data');
     } finally {
       if (!refreshOnly) {
         setLoading(false);
