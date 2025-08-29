@@ -1,5 +1,5 @@
 import axios from "axios";
-import { format, addDays, subDays } from "date-fns";
+import { format, addDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
 const BRIGHTSKY_API_URL = "https://api.brightsky.dev";
@@ -78,9 +78,6 @@ export interface ForecastData {
   precipitationProbability: number;
 }
 
-/**
- * Fetches current weather data for Berlin
- */
 export const getCurrentWeather = async (): Promise<CurrentWeatherData> => {
   try {
     const date = new Date();
@@ -97,7 +94,6 @@ export const getCurrentWeather = async (): Promise<CurrentWeatherData> => {
       }
     );
 
-    // Check if the response data has the expected structure
     if (!response.data || !response.data.weather) {
       console.error(
         "Invalid response structure from BrightSky API:",
@@ -125,14 +121,11 @@ export const getCurrentWeather = async (): Promise<CurrentWeatherData> => {
   }
 };
 
-/**
- * Create fallback current weather data
- */
 const createFallbackCurrentWeather = (): CurrentWeatherData => {
   return {
-    temperature: 15, // More realistic fallback temperature
-    condition: "clear-day",
-    icon: "clear-day",
+    temperature: 0,
+    condition: "some-error",
+    icon: "some-error",
     precipitation: 0,
     precipitationProbability: 0,
     precipitation30min: 0,
@@ -142,9 +135,6 @@ const createFallbackCurrentWeather = (): CurrentWeatherData => {
   };
 };
 
-/**
- * Fetches forecast data for the next 3 days for Berlin
- */
 export const getWeatherForecast = async (): Promise<ForecastData[]> => {
   try {
     const today = new Date();
@@ -164,7 +154,6 @@ export const getWeatherForecast = async (): Promise<ForecastData[]> => {
       }
     );
 
-    // Check if the response data has the expected structure
     if (
       !response.data ||
       !response.data.weather ||
@@ -174,7 +163,6 @@ export const getWeatherForecast = async (): Promise<ForecastData[]> => {
         "Invalid response structure from BrightSky API:",
         response.data
       );
-      // Return fallback data in case of error
       return generateFallbackForecast();
     }
 
@@ -186,14 +174,11 @@ export const getWeatherForecast = async (): Promise<ForecastData[]> => {
     }));
   } catch (error) {
     console.error("Error fetching forecast data:", error);
-    // Return fallback data in case of error
     return generateFallbackForecast();
   }
 };
 
-/**
- * Generate fallback forecast data
- */
+
 const generateFallbackForecast = (): ForecastData[] => {
   const fallbackData: ForecastData[] = [];
   const now = new Date();
@@ -202,8 +187,8 @@ const generateFallbackForecast = (): ForecastData[] => {
     const timestamp = new Date(now.getTime() + i * 3600 * 1000).toISOString();
     fallbackData.push({
       timestamp,
-      temperature: 15 + Math.sin(i / 4) * 5, // Sinusoidal temperature pattern
-      condition: "clear-day",
+      temperature: 0,
+      condition: "some-error",
       precipitationProbability: 0,
     });
   }
@@ -226,12 +211,4 @@ export const formatBerlinTime = (
  */
 export const formatBerlinDay = (dateStr: string): string => {
   return formatInTimeZone(new Date(dateStr), TIMEZONE, "EEE");
-};
-
-/**
- * Determine if a given timestamp is during daytime
- */
-export const isDaytime = (dateStr: string): boolean => {
-  const hour = parseInt(formatInTimeZone(new Date(dateStr), TIMEZONE, "H"));
-  return hour >= 6 && hour < 20;
 };
