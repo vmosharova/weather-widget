@@ -27,10 +27,6 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
   return (
     <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
       <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
-        {/* Percentage labels */}
-        <div className="absolute -left-6" style={{ fontSize: '12px', color: '#9CA3AF', top: '-12px' }}>100</div>
-        <div className="absolute -left-4" style={{ fontSize: '12px', color: '#9CA3AF', bottom: '-8px' }}>0</div>
-        
         {/* Precipitation bars */}
         <div className="h-full flex items-end justify-start absolute inset-0">
           {data.map((item, index) => {
