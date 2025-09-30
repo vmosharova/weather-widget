@@ -120,6 +120,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
     return ticks;
   }, [chartData]);
   
+  const hasRain = useMemo(() => {
+    return chartData.some((item) => (item?.precipitationProbability ?? 0) >= 10);
+  }, [chartData]);
+  
   if (isLoading) {
     return (
       <div className="animate-pulse h-full bg-slate-700/50 rounded-lg"></div>
@@ -159,6 +163,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
 
   return (
     <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full flex flex-col overflow-hidden">
+
       {/* Current Weather Section */}
       {!isLoading && currentWeather && (
         <div className="mb-2 flex items-center justify-between flex-shrink-0">
@@ -172,6 +177,43 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             </div>
           </div>
         </div>
+      )}
+
+      {/* Weekdays */}
+      <div className="relative" style={{ marginLeft: '60px', marginRight: '20px', height: '20px' }}>
+        <div className="absolute inset-0">
+          {(() => {
+            const middayTicks = hourlyTicks.filter(tick => formatBerlinTime(tick, 'HH') === '12');
+            const totalPoints = chartData.length > 1 ? chartData.length - 1 : 0;
+            return middayTicks.map((tick, index) => {
+              const idx = chartData.findIndex(d => d.timestamp === tick);
+              if (idx < 0 || totalPoints === 0) return null;
+              const leftPosition = (idx / totalPoints) * 100;
+              return (
+                <div
+                  key={`day-label-top-${index}`}
+                  className="absolute text-xs text-slate-300 font-medium"
+                  style={{ left: `${leftPosition}%`, transform: 'translateX(-50%)' }}
+                >
+                  {formatBerlinDay(tick)}
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </div>      
+      
+      {hasRain && (
+        <>
+          <div className="flex-shrink-0 my-4">
+            <PrecipitationChart 
+              data={chartData} 
+              isLoading={isLoading} 
+              closestTimestamp={closestTimestamp} 
+              currentDay={currentDay} 
+            />
+          </div>
+        </>
       )}
       
       <div className="flex-1 min-h-0">
@@ -268,9 +310,9 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     dataKey="temperature"
                     stroke="none"
                     fill="none"
-                    dot={(props: any) => {
-                      const { cx, cy, payload } = props;
-                      if (payload.timestamp === entry.timestamp) {
+                    dot={(props: { cx?: number; cy?: number; payload?: EnhancedForecastData }) => {
+                      const { cx = 0, cy = 0, payload } = props;
+                      if (payload && payload.timestamp === entry.timestamp) {
                         const labelY = entry.isLow ? cy - 25 : cy - 25;
                         return (
                           <g key={`temp-label-${index}`}>
@@ -296,23 +338,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               return null;
             })}
             
-            {/* Day labels positioned above 12:00 timestamps */}
-            {hourlyTicks
-              .filter(tick => formatBerlinTime(tick, 'HH') === '12')
-              .map((tick, index) => (
-                <ReferenceLine
-                  key={`day-label-${index}`}
-                  x={tick}
-                  stroke="transparent"
-                  label={{
-                    value: formatBerlinDay(tick),
-                    position: 'top',
-                    fill: '#94A3B8',
-                    fontSize: 14,
-                    offset: 30
-                  }}
-                />
-              ))}
 
             {/* Day start markers - tiny vertical lines at 00:00 */}
             {hourlyTicks
@@ -345,14 +370,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </ResponsiveContainer>
       </div>
       
-      <div className="flex-shrink-0 mt-2">
-        <PrecipitationChart 
-          data={chartData} 
-          isLoading={isLoading} 
-          closestTimestamp={closestTimestamp} 
-          currentDay={currentDay} 
-        />
-      </div>
     </div>
   );
 };
