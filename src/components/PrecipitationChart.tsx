@@ -47,15 +47,15 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
 
   return (
     <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
-      <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
+      <div className="rounded relative" style={{ height: '32px' }}>
         {/* Precipitation bars */}
-        <div className="h-full flex items-end justify-start absolute inset-0">
+        <div className="h-full flex items-start justify-start absolute inset-0">
           {displayData.map((item, index) => {
             const totalWidth = displayData.length > 0 ? (100 / displayData.length) : 0;
             return (
               <div
                 key={`precip-${index}`}
-                className="flex flex-col items-center justify-end"
+                className="flex flex-col items-center justify-start"
                 style={{ 
                   width: `${totalWidth}%`,
                   height: '30px'
