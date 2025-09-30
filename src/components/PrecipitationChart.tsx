@@ -24,13 +24,34 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
     return <div className="p-2 text-gray-300">No precipitation data available</div>;
   }
 
+
+  // TODO remove later: show some example rain in development to preview the UI.
+  const hasVisibleBars = data.some(item => (item as any).precipitationProbability >= 10);
+  const displayData = React.useMemo(() => {
+    if (hasVisibleBars || !import.meta.env.DEV) {
+      return data;
+    }
+    const cloned = data.map(d => ({ ...d }));
+    const exampleValues = [15, 40, 75, 55];
+    if (cloned.length >= exampleValues.length) {
+      let startIndex = Math.max(0, Math.floor(cloned.length / 2) - Math.floor(exampleValues.length / 2));
+      if (startIndex + exampleValues.length > cloned.length) {
+        startIndex = cloned.length - exampleValues.length;
+      }
+      for (let j = 0; j < exampleValues.length; j++) {
+        (cloned[startIndex + j] as any).precipitationProbability = exampleValues[j];
+      }
+    }
+    return cloned;
+  }, [data, hasVisibleBars]);
+
   return (
     <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
       <div className="border border-slate-600 rounded relative" style={{ height: '32px' }}>
         {/* Precipitation bars */}
         <div className="h-full flex items-end justify-start absolute inset-0">
-          {data.map((item, index) => {
-            const totalWidth = data.length > 0 ? (100 / data.length) : 0;
+          {displayData.map((item, index) => {
+            const totalWidth = displayData.length > 0 ? (100 / displayData.length) : 0;
             return (
               <div
                 key={`precip-${index}`}
@@ -57,9 +78,9 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
         </div>
         
         {/* "Now" line extension */}
-        {data.some(entry => formatBerlinDay(entry.timestamp) === currentDay) && (() => {
-          const nowIndex = data.findIndex(item => item.timestamp === closestTimestamp);
-          const leftPosition = nowIndex >= 0 ? (nowIndex / (data.length - 1)) * 100 : 0;
+        {displayData.some(entry => formatBerlinDay(entry.timestamp) === currentDay) && (() => {
+          const nowIndex = displayData.findIndex(item => item.timestamp === closestTimestamp);
+          const leftPosition = nowIndex >= 0 ? (nowIndex / (displayData.length - 1)) * 100 : 0;
           return (
             <div 
               className="absolute top-0 bottom-0 border-l-2 border-blue-400" 

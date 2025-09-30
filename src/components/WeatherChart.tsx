@@ -174,7 +174,8 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
           </div>
         </div>
       )}
-      {/* Weekday labels aligned to 12:00, above precipitation chart */}
+      
+      {/* Weekdays */}
       <div className="relative" style={{ marginLeft: '60px', marginRight: '20px', height: '20px' }}>
         <div className="absolute inset-0">
           {(() => {
