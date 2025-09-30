@@ -47,7 +47,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
               }
               const info = blocks.get(key)!;
               info.indices.push(index);
-              if ((item as any).precipitationProbability >= 10) {
+              if (item.precipitationProbability >= 10) {
                 info.hasRain = true;
               }
             });

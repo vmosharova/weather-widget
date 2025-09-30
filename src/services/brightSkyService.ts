@@ -30,7 +30,6 @@ export interface CurrentWeatherResponse {
     condition: string;
     icon: string;
   };
-  sources: Array<any>;
 }
 
 export interface WeatherData {
@@ -56,7 +55,6 @@ export interface WeatherData {
     precipitation_60: number;
     icon: string;
   }>;
-  sources: Array<any>;
 }
 
 export interface CurrentWeatherData {

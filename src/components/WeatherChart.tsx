@@ -121,7 +121,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   }, [chartData]);
   
   const hasRain = useMemo(() => {
-    return chartData.some((item: any) => (item?.precipitationProbability ?? 0) >= 10);
+    return chartData.some((item) => (item?.precipitationProbability ?? 0) >= 10);
   }, [chartData]);
   
   if (isLoading) {
@@ -310,9 +310,9 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     dataKey="temperature"
                     stroke="none"
                     fill="none"
-                    dot={(props: any) => {
-                      const { cx, cy, payload } = props;
-                      if (payload.timestamp === entry.timestamp) {
+                    dot={(props: { cx?: number; cy?: number; payload?: EnhancedForecastData }) => {
+                      const { cx = 0, cy = 0, payload } = props;
+                      if (payload && payload.timestamp === entry.timestamp) {
                         const labelY = entry.isLow ? cy - 25 : cy - 25;
                         return (
                           <g key={`temp-label-${index}`}>
