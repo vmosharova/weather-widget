@@ -120,6 +120,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
     return ticks;
   }, [chartData]);
   
+  const hasRain = useMemo(() => {
+    return chartData.some((item: any) => (item?.precipitationProbability ?? 0) >= 10);
+  }, [chartData]);
+  
   if (isLoading) {
     return (
       <div className="animate-pulse h-full bg-slate-700/50 rounded-lg"></div>
@@ -174,7 +178,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
           </div>
         </div>
       )}
-      
+
       {/* Weekdays */}
       <div className="relative" style={{ marginLeft: '60px', marginRight: '20px', height: '20px' }}>
         <div className="absolute inset-0">
@@ -197,16 +201,20 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             });
           })()}
         </div>
-      </div>
+      </div>      
       
-      <div className="flex-shrink-0 my-4">
-        <PrecipitationChart 
-          data={chartData} 
-          isLoading={isLoading} 
-          closestTimestamp={closestTimestamp} 
-          currentDay={currentDay} 
-        />
-      </div>
+      {hasRain && (
+        <>
+          <div className="flex-shrink-0 my-4">
+            <PrecipitationChart 
+              data={chartData} 
+              isLoading={isLoading} 
+              closestTimestamp={closestTimestamp} 
+              currentDay={currentDay} 
+            />
+          </div>
+        </>
+      )}
       
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">

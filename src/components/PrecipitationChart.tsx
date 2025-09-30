@@ -101,22 +101,6 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
           })}
         </div>
         
-        {/* "Now" line extension */}
-        {data.some(entry => formatBerlinDay(entry.timestamp) === currentDay) && (() => {
-          const nowIndex = data.findIndex(item => item.timestamp === closestTimestamp);
-          const leftPosition = nowIndex >= 0 ? (nowIndex / (data.length - 1)) * 100 : 0;
-          return (
-            <div 
-              className="absolute top-0 bottom-0 border-l-2 border-blue-400" 
-              style={{ 
-                left: `${leftPosition}%`,
-                width: '2px',
-                pointerEvents: 'none',
-                fontWeight: 'bold',
-              }}
-            />
-          );
-        })()}
       </div>
     </div>
   );
