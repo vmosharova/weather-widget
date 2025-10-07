@@ -220,7 +220,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       
       {hasRain && (
         <>
-          <div className="flex-shrink-0 my-4">
+          <div className="flex-shrink-0 mt-1">
             <PrecipitationChart 
               data={chartData} 
               isLoading={isLoading} 
@@ -231,7 +231,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </>
       )}
       
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 mt-[-60px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
