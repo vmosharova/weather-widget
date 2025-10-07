@@ -231,11 +231,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </>
       )}
       
-      <div className="flex-1 min-h-0 mt-[-60px] mb-[-20px]">
+      <div className="flex-1 min-h-0 mt-[-60px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 50, right: 20, left: 0, bottom: 30 }}
+            margin={{ top: 30, right: 20, left: 0, bottom: 10 }}
           >
             <defs>
               {/* Temperature gradient from top to bottom - absolute temperature based */}
@@ -302,7 +302,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               type="monotone"
               dataKey="temperature"
               stroke="#ffffff"
-              strokeWidth={2}
               fill="url(#temperatureGradient)"
               name="Temperature"
               connectNulls
@@ -328,16 +327,17 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     dot={(props: { cx?: number; cy?: number; payload?: EnhancedForecastData }) => {
                       const { cx = 0, cy = 0, payload } = props;
                       if (payload && payload.timestamp === entry.timestamp) {
-                        const labelY = entry.isLow ? cy - 25 : cy - 25;
+                        const labelY = cy + 20;
                         return (
                           <g key={`temp-label-${index}`}>
                             <text
                               x={cx}
                               y={labelY}
                               textAnchor="middle"
-                              fill="#E2E8F0"
+                              fill="#fff"
                               fontSize={12}
                               fontWeight="bold"
+                              dominantBaseline="hanging"
                             >
                               {Math.round(entry.temperature)} °
                             </text>
