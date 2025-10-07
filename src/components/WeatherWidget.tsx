@@ -11,7 +11,6 @@ const WeatherWidget: React.FC = () => {
   const [forecast, setForecast] = useState<ForecastData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchWeatherData = useCallback(async (refreshOnly = false) => {
     try {
@@ -27,7 +26,6 @@ const WeatherWidget: React.FC = () => {
       
       setCurrentWeather(currentData);
       setForecast(forecastData);
-      setLastUpdated(new Date());
     } catch (err) {
       console.error('Error fetching weather data:', err);
       setError('Failed to fetch weather data. Please try again later.');
@@ -47,16 +45,8 @@ const WeatherWidget: React.FC = () => {
   }, [fetchWeatherData]);
   
   return (
-    <div className="h-full w-full p-4 bg-slate-900/90 text-white backdrop-blur-xl flex flex-col">
+    <div className="h-full w-full bg-slate-900/90 text-white backdrop-blur-xl flex flex-col">
       <Toaster position="top-right" />
-      <header className="mb-4 flex justify-between items-center flex-shrink-0">
-        <h1 className="text-xl font-bold text-white">Berlin Weather</h1>
-        {lastUpdated && (
-          <p className="text-xs text-gray-400">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </p>
-        )}
-      </header>
       
       {error && (
         <div className="p-4 bg-red-900/60 text-red-200 rounded-md mb-4 border border-red-800 flex-shrink-0">
@@ -64,7 +54,7 @@ const WeatherWidget: React.FC = () => {
         </div>
       )}
       
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 p-2">
         <WeatherChart data={forecast} currentWeather={currentWeather} isLoading={loading} />
       </div>
     </div>

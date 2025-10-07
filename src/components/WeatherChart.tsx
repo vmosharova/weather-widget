@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { ForecastData, CurrentWeatherData, formatBerlinTime, formatBerlinDay } from '@/services/brightSkyService';
 import { getWeatherIcon, getWeatherDescription } from '@/utils/weatherIcons';
@@ -23,6 +23,8 @@ interface EnhancedForecastData extends ForecastData {
 
 const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoading }) => {
   const WeatherIcon = getWeatherIcon(currentWeather?.icon || 'clear-day');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  
   const chartData = useMemo(() => {
     if (!data || !data.length) return [];
     
@@ -124,6 +126,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
     return chartData.some((item) => (item?.precipitationProbability ?? 0) >= 10);
   }, [chartData]);
   
+  useEffect(() => {
+    setLastUpdated(new Date());
+  }, [data, isLoading]);
+  
   if (isLoading) {
     return (
       <div className="animate-pulse h-full bg-slate-700/50 rounded-lg"></div>
@@ -162,10 +168,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   }
 
   return (
-    <div className="p-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full flex flex-col overflow-hidden">
+    <div className="pr-3 bg-slate-800/90 rounded-lg shadow-md border border-slate-700 backdrop-blur-lg h-full flex flex-col overflow-hidden">
 
       {/* Current Weather Section */}
       {!isLoading && currentWeather && (
+        <>
         <div className="mb-2 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center">
             <WeatherIcon size={32} className="text-blue-400 mr-2" />
@@ -176,7 +183,15 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               </div>
             </div>
           </div>
+          <div>
+            {lastUpdated && (
+              <p className="text-xs text-gray-400">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
         </div>
+      </>
       )}
 
       {/* Weekdays */}
@@ -205,7 +220,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       
       {hasRain && (
         <>
-          <div className="flex-shrink-0 my-4">
+          <div className="flex-shrink-0 mt-1">
             <PrecipitationChart 
               data={chartData} 
               isLoading={isLoading} 
@@ -216,11 +231,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
         </>
       )}
       
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 mt-[-60px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 50, right: 20, left: 0, bottom: 30 }}
+            margin={{ top: 30, right: 20, left: 0, bottom: 10 }}
           >
             <defs>
               {/* Temperature gradient from top to bottom - absolute temperature based */}
@@ -287,7 +302,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
               type="monotone"
               dataKey="temperature"
               stroke="#ffffff"
-              strokeWidth={2}
               fill="url(#temperatureGradient)"
               name="Temperature"
               connectNulls
@@ -313,16 +327,17 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                     dot={(props: { cx?: number; cy?: number; payload?: EnhancedForecastData }) => {
                       const { cx = 0, cy = 0, payload } = props;
                       if (payload && payload.timestamp === entry.timestamp) {
-                        const labelY = entry.isLow ? cy - 25 : cy - 25;
+                        const labelY = cy + 20;
                         return (
                           <g key={`temp-label-${index}`}>
                             <text
                               x={cx}
                               y={labelY}
                               textAnchor="middle"
-                              fill="#E2E8F0"
+                              fill="#fff"
                               fontSize={12}
                               fontWeight="bold"
+                              dominantBaseline="hanging"
                             >
                               {Math.round(entry.temperature)} °
                             </text>

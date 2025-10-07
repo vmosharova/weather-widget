@@ -29,7 +29,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
   return (
     <div className="relative" style={{ marginLeft: '60px', marginRight: '20px' }}>
       {/* 3-hour block rain icons above bars */}
-      <div className="relative mb-1" style={{ height: '54px' }} aria-hidden="true">
+      <div className="relative mb-1" style={{ height: '44px' }} aria-hidden="true">
         <div className="absolute inset-0">
           {(() => {
             const totalPoints = data.length > 1 ? data.length - 1 : 0;
@@ -40,7 +40,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
               const day = formatBerlinDay(item.timestamp);
               const hour = parseInt(formatBerlinTime(item.timestamp, 'H'));
               // TODO modify cloud icon per hour:
-              const blockStartHour = Math.floor(hour / 3) * 3;
+              const blockStartHour = Math.floor(hour / 4) * 4;
               const key = `${day}-${blockStartHour}`;
               if (!blocks.has(key)) {
                 blocks.set(key, { indices: [], hasRain: false });
