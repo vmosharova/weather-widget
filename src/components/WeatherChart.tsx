@@ -173,9 +173,9 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       {/* Current Weather Section */}
       {!isLoading && currentWeather && (
         <>
-        <div className="mb-2 flex items-center justify-between flex-shrink-0">
+        <div className="mb-2 mt-1 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center">
-            <WeatherIcon size={32} className="text-blue-400 mr-2" />
+            <WeatherIcon size={32} className="text-blue-400 mx-2" />
             <div className="text-3xl font-bold text-white">{Math.round(currentWeather.temperature || 0)}°</div>
             <div className="ml-2">
               <div className="text-sm text-gray-200">
