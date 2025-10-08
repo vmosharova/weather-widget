@@ -87,7 +87,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
               >
                 {item.precipitationProbability >= 10 && (
                   <div
-                    className="bg-blue-500 opacity-70 rounded-t-sm"
+                    className="bg-blue-500 opacity-70 rounded-b-sm"
                     style={{ 
                       height: `${(item.precipitationProbability / 100) * 30}px`,
                       width: '6px',
