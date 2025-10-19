@@ -128,7 +128,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
     return chartData.some((item) => {
       const isToday = item.formattedDay === todayDay;
       const isPast = isToday && new Date(item.timestamp) < new Date(nowIso);
-      const pastHasRain = isPast && (item as any).precipitation > 0;
+      const pastHasRain = isPast && ((item as unknown as { precipitation?: number }).precipitation ?? 0) > 0;
       const futureHasRain = (item?.precipitationProbability ?? 0) >= 10;
       return pastHasRain || futureHasRain;
     });
