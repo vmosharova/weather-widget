@@ -165,13 +165,31 @@ export const getWeatherForecast = async (): Promise<ForecastData[]> => {
       return generateFallbackForecast();
     }
 
-    return response.data.weather.map((item) => ({
+    const result = response.data.weather.map((item) => ({
       timestamp: item.timestamp,
       temperature: item.temperature,
       condition: item.condition || "clear-day",
       precipitationProbability: item.precipitation_probability || 0,
       precipitation: item.precipitation ?? 0,
     }));
+
+    // Development-only: inject synthetic past precipitation to visually test the chart
+    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_RAIN === '1') {
+      const nowIso = new Date().toISOString();
+      const today = formatBerlinDay(nowIso);
+      let injected = 0;
+      for (let i = 0; i < result.length; i++) {
+        const d = result[i];
+        const isToday = formatBerlinDay(d.timestamp) === today;
+        const isPast = isToday && new Date(d.timestamp) < new Date(nowIso);
+        if (isToday && isPast && injected < 3) {
+          result[i] = { ...d, precipitation: 2.4 };
+          injected++;
+        }
+      }
+    }
+
+    return result;
   } catch (error) {
     console.error("Error fetching forecast data:", error);
     return generateFallbackForecast();
