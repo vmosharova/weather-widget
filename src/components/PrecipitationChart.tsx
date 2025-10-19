@@ -39,7 +39,6 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
             data.forEach((item, index) => {
               const day = formatBerlinDay(item.timestamp);
               const hour = parseInt(formatBerlinTime(item.timestamp, 'H'));
-              // TODO modify cloud icon per hour:
               const blockStartHour = Math.floor(hour / 4) * 4;
               const key = `${day}-${blockStartHour}`;
               if (!blocks.has(key)) {
@@ -47,7 +46,8 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
               }
               const info = blocks.get(key)!;
               info.indices.push(index);
-              if (item.precipitationProbability >= 10) {
+              const isPast = day === currentDay && new Date(item.timestamp) < new Date(closestTimestamp);
+              if ((isPast && ((item as any).precipitation ?? 0) > 0) || (!isPast && ((item.precipitationProbability ?? 0) >= 10))) {
                 info.hasRain = true;
               }
             });
@@ -76,6 +76,16 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
         <div className="h-full flex items-start justify-start absolute inset-0">
           {data.map((item, index) => {
             const totalWidth = data.length > 0 ? (100 / data.length) : 0;
+            const isPast = formatBerlinDay(item.timestamp) === currentDay && new Date(item.timestamp) < new Date(closestTimestamp);
+            const showPastBar = isPast && (((item as any).precipitation ?? 0) > 0);
+            const showFutureBar = !isPast && ((item.precipitationProbability ?? 0) >= 10);
+            const MAX_MM = 5; // full height at 5 mm/h
+            const heightPx = showPastBar
+              ? Math.max(2, Math.min(30, (((item as any).precipitation || 0) / MAX_MM) * 30))
+              : Math.max(2, ((item.precipitationProbability / 100) * 30));
+            const titleText = showPastBar
+              ? `${formatBerlinTime(item.timestamp, 'HH:mm')}: ${(((item as any).precipitation || 0).toLocaleString('de-DE'))} mm`
+              : `${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`;
             return (
               <div
                 key={`precip-${index}`}
@@ -85,15 +95,15 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
                   height: '30px'
                 }}
               >
-                {item.precipitationProbability >= 10 && (
+                {(showPastBar || showFutureBar) && (
                   <div
                     className="bg-blue-500 opacity-70 rounded-b-sm"
                     style={{ 
-                      height: `${(item.precipitationProbability / 100) * 30}px`,
+                      height: `${heightPx}px`,
                       width: '6px',
                       minHeight: '2px'
                     }}
-                    title={`${formatBerlinTime(item.timestamp, 'HH:mm')}: ${item.precipitationProbability}% chance of rain`}
+                    title={titleText}
                   />
                 )}
               </div>

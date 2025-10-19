@@ -74,6 +74,7 @@ export interface ForecastData {
   temperature: number;
   condition: string;
   precipitationProbability: number;
+  precipitation: number;
 }
 
 export const getCurrentWeather = async (): Promise<CurrentWeatherData> => {
@@ -169,6 +170,7 @@ export const getWeatherForecast = async (): Promise<ForecastData[]> => {
       temperature: item.temperature,
       condition: item.condition || "clear-day",
       precipitationProbability: item.precipitation_probability || 0,
+      precipitation: item.precipitation ?? 0,
     }));
   } catch (error) {
     console.error("Error fetching forecast data:", error);
@@ -188,6 +190,7 @@ const generateFallbackForecast = (): ForecastData[] => {
       temperature: 0,
       condition: "some-error",
       precipitationProbability: 0,
+      precipitation: 0,
     });
   }
 
