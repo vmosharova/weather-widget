@@ -336,12 +336,17 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                       const { cx = 0, cy = 0, payload } = props;
                       if (payload && payload.timestamp === entry.timestamp) {
                         const labelY = cy + 20;
+                        const isFirst = index === 0;
+                        const isLast = index === chartData.length - 1;
+                        const edgeOffset = 12;
+                        const labelX = isFirst ? cx + edgeOffset : isLast ? cx - edgeOffset : cx;
+                        const anchor: 'start' | 'middle' | 'end' = isFirst ? 'start' : isLast ? 'end' : 'middle';
                         return (
                           <g key={`temp-label-${index}`}>
                             <text
-                              x={cx}
+                              x={labelX}
                               y={labelY}
-                              textAnchor="middle"
+                              textAnchor={anchor}
                               fill="#fff"
                               fontSize={12}
                               fontWeight="bold"
