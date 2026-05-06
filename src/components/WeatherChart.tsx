@@ -323,26 +323,26 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             />
             
             {/* Temperature labels for high and low points */}
-            {chartData.map((entry, index) => {
+            {chartData.map((entry, entryIndex) => {
               if (entry.isHigh || entry.isLow) {
                 return (
                   <Area
-                    key={`label-${index}`}
+                    key={`label-${entryIndex}`}
                     type="monotone"
                     dataKey="temperature"
                     stroke="none"
                     fill="none"
-                    dot={(props: { cx?: number; cy?: number; payload?: EnhancedForecastData }) => {
-                      const { cx = 0, cy = 0, payload } = props;
-                      if (payload && payload.timestamp === entry.timestamp) {
+                    dot={(props: { cx?: number; cy?: number; index?: number }) => {
+                      const { cx = 0, cy = 0, index } = props;
+                      if (index === entryIndex) {
                         const labelY = cy + 20;
-                        const isFirst = index === 0;
-                        const isLast = index === chartData.length - 1;
+                        const isFirst = entryIndex === 0;
+                        const isLast = entryIndex === chartData.length - 1;
                         const edgeOffset = 12;
                         const labelX = isFirst ? cx + edgeOffset : isLast ? cx - edgeOffset : cx;
                         const anchor: 'start' | 'middle' | 'end' = isFirst ? 'start' : isLast ? 'end' : 'middle';
                         return (
-                          <g key={`temp-label-${index}`}>
+                          <g key={`temp-label-${entryIndex}`}>
                             <text
                               x={labelX}
                               y={labelY}
