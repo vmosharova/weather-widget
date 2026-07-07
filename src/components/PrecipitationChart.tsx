@@ -6,14 +6,12 @@ interface PrecipitationChartProps {
   data: ForecastData[];
   isLoading: boolean;
   closestTimestamp: string;
-  currentDay: string;
 }
 
-const PrecipitationChart: React.FC<PrecipitationChartProps> = ({ 
-  data, 
-  isLoading, 
-  closestTimestamp, 
-  currentDay 
+const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
+  data,
+  isLoading,
+  closestTimestamp
 }) => {
   if (isLoading) {
     return (
@@ -46,7 +44,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
               }
               const info = blocks.get(key)!;
               info.indices.push(index);
-              const isPast = day === currentDay && new Date(item.timestamp) < new Date(closestTimestamp);
+              const isPast = new Date(item.timestamp) < new Date(closestTimestamp);
               const precipActive = (isPast && (item.precipitation ?? 0) > 0) || (!isPast && ((item.precipitationProbability ?? 0) >= 5));
               if (precipActive) {
                 info.hasPrecip = true;
@@ -77,7 +75,7 @@ const PrecipitationChart: React.FC<PrecipitationChartProps> = ({
         <div className="h-full flex items-start justify-start absolute inset-0">
           {data.map((item, index) => {
             const totalWidth = data.length > 0 ? (100 / data.length) : 0;
-            const isPast = formatBerlinDay(item.timestamp) === currentDay && new Date(item.timestamp) < new Date(closestTimestamp);
+            const isPast = new Date(item.timestamp) < new Date(closestTimestamp);
             const showPastBar = isPast && ((item.precipitation ?? 0) > 0);
             const showFutureBar = !isPast && ((item.precipitationProbability ?? 0) >= 5);
             const isSnow = ((item.condition || '').toLowerCase().includes('snow') || (item.condition || '').toLowerCase().includes('sleet'));

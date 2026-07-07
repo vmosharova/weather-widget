@@ -1,5 +1,5 @@
 import axios from "axios";
-import { format, addDays } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
 const BRIGHTSKY_API_URL = "https://api.brightsky.dev";
@@ -137,7 +137,9 @@ const createFallbackCurrentWeather = (): CurrentWeatherData => {
 export const getWeatherForecast = async (): Promise<ForecastData[]> => {
   try {
     const today = new Date();
-    const startDate = format(today, "yyyy-MM-dd");
+    // Start one day in the past so yesterday's observed weather is shown
+    // alongside the 3-day forecast on the same chart.
+    const startDate = format(subDays(today, 1), "yyyy-MM-dd");
     const endDate = format(addDays(today, 3), "yyyy-MM-dd");
 
     const response = await axios.get<WeatherData>(

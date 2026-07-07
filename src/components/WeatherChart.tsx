@@ -123,13 +123,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   }, [chartData]);
   
   const hasRain = useMemo(() => {
-    const nowIso = new Date().toISOString();
-    const todayDay = formatBerlinDay(nowIso);
+    const now = new Date();
     return chartData.some((item) => {
-      const isToday = item.formattedDay === todayDay;
-      const isPast = isToday && new Date(item.timestamp) < new Date(nowIso);
+      const isPast = new Date(item.timestamp) < now;
       const pastHasRain = isPast && ((item as unknown as { precipitation?: number }).precipitation ?? 0) > 0;
-      const futureHasRain = (item?.precipitationProbability ?? 0) >= 5;
+      const futureHasRain = !isPast && (item?.precipitationProbability ?? 0) >= 5;
       return pastHasRain || futureHasRain;
     });
   }, [chartData]);
@@ -154,6 +152,18 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   
   // Get the current day in Berlin timezone to check if the "Now" line should be displayed
   const currentDay = formatBerlinDay(now);
+
+  // Boundary between yesterday's observed data and the forecast: today's first
+  // data point (00:00 Berlin time). Used to draw the divider line.
+  const forecastStartIndex = chartData.findIndex(
+    entry => entry.formattedDay === currentDay
+  );
+  const forecastStartTimestamp =
+    forecastStartIndex >= 0 ? chartData[forecastStartIndex].timestamp : undefined;
+  // Horizontal position of the divider as a percentage across the plotting band,
+  // matching how the weekday labels are positioned.
+  const forecastDividerLeft =
+    chartData.length > 1 ? (forecastStartIndex / (chartData.length - 1)) * 100 : 0;
   
   // Find the closest forecast point to the current time to ensure the line appears properly
   let closestTimestamp = now;
@@ -202,6 +212,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       </>
       )}
 
+      {/* Content wrapper for weekday labels, precipitation and the temperature
+          chart. Anchors the full-height yesterday/forecast divider overlay. */}
+      <div className="relative flex-1 min-h-0 flex flex-col">
+
       {/* Weekdays */}
       <div className="relative" style={{ marginLeft: '60px', marginRight: '20px', height: '20px' }}>
         <div className="absolute inset-0">
@@ -229,11 +243,10 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       {hasRain && (
         <>
           <div className="flex-shrink-0 mt-1">
-            <PrecipitationChart 
-              data={chartData} 
-              isLoading={isLoading} 
-              closestTimestamp={closestTimestamp} 
-              currentDay={currentDay} 
+            <PrecipitationChart
+              data={chartData}
+              isLoading={isLoading}
+              closestTimestamp={closestTimestamp}
             />
           </div>
         </>
@@ -367,9 +380,11 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
             })}
             
 
-            {/* Day start markers - tiny vertical lines at 00:00 */}
+            {/* Day start markers - tiny vertical lines at 00:00
+                (the yesterday/forecast boundary is drawn separately below) */}
             {hourlyTicks
               .filter(tick => formatBerlinTime(tick, 'HH') === '00')
+              .filter(tick => tick !== forecastStartTimestamp)
               .map((tick, index) => (
                 <ReferenceLine
                   key={`day-start-${index}`}
@@ -379,6 +394,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
                   strokeDasharray="2 2"
                 />
               ))}
+
 
             {/* "Now" line - only displayed for today */}
             {chartData.some(entry => entry.formattedDay === currentDay) && (
@@ -397,7 +413,28 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      
+
+      {/* Full-height divider separating yesterday from the forecast, spanning
+          the weekday labels, precipitation and temperature chart. */}
+      {forecastStartIndex > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ marginLeft: '60px', marginRight: '20px' }}
+        >
+          <div
+            className="absolute top-0"
+            style={{
+              left: `${forecastDividerLeft}%`,
+              bottom: '38px',
+              width: '1px',
+              backgroundColor: '#CBD5E1',
+            }}
+          />
+        </div>
+      )}
+
+      </div>
+
     </div>
   );
 };
