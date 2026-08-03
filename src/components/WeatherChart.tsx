@@ -154,17 +154,13 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
   const currentDay = formatBerlinDay(now);
 
   // Boundary between yesterday's observed data and the forecast: today's first
-  // data point (00:00 Berlin time). Used to draw the divider line.
+  // data point (00:00 Berlin time). Its 00:00 day-start marker is skipped below.
   const forecastStartIndex = chartData.findIndex(
     entry => entry.formattedDay === currentDay
   );
   const forecastStartTimestamp =
     forecastStartIndex >= 0 ? chartData[forecastStartIndex].timestamp : undefined;
-  // Horizontal position of the divider as a percentage across the plotting band,
-  // matching how the weekday labels are positioned.
-  const forecastDividerLeft =
-    chartData.length > 1 ? (forecastStartIndex / (chartData.length - 1)) * 100 : 0;
-  
+
   // Find the closest forecast point to the current time to ensure the line appears properly
   let closestTimestamp = now;
   if (chartData.length > 0) {
@@ -213,7 +209,7 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
       )}
 
       {/* Content wrapper for weekday labels, precipitation and the temperature
-          chart. Anchors the full-height yesterday/forecast divider overlay. */}
+          chart. */}
       <div className="relative flex-1 min-h-0 flex flex-col">
 
       {/* Weekdays */}
@@ -413,25 +409,6 @@ const WeatherChart: React.FC<WeatherChartProps> = ({ data, currentWeather, isLoa
           </AreaChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Full-height divider separating yesterday from the forecast, spanning
-          the weekday labels, precipitation and temperature chart. */}
-      {forecastStartIndex > 0 && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ marginLeft: '60px', marginRight: '20px' }}
-        >
-          <div
-            className="absolute top-0"
-            style={{
-              left: `${forecastDividerLeft}%`,
-              bottom: '38px',
-              width: '1px',
-              backgroundColor: '#CBD5E1',
-            }}
-          />
-        </div>
-      )}
 
       </div>
 
